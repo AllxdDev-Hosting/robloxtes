@@ -1,143 +1,152 @@
--- Floating Menu Script
+-- AllxdDev Anime Menu
+
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
 -- SETTINGS
-local autoAnswer = false
-local speedOn = false
-local jumpOn = false
-local delayTime = 1
+local speedToggle=false
+local jumpToggle=false
+local aiToggle=false
+local aiDelay=1
+local extraWord=""
 
--- ===== UI =====
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "AllxdDevMenu"
+-- UI
+local gui=Instance.new("ScreenGui",game.CoreGui)
+gui.Name="AllxdDevMenu"
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,220,0,180)
-frame.Position = UDim2.new(0.1,0,0.3,0)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-frame.Active = true
-frame.Draggable = true
+local frame=Instance.new("Frame",gui)
+frame.Size=UDim2.new(0,260,0,280)
+frame.Position=UDim2.new(0.1,0,0.3,0)
+frame.BackgroundColor3=Color3.fromRGB(20,30,60)
+frame.Active=true
+frame.Draggable=true
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,30)
-title.Text = "AllxdDev Menu"
-title.BackgroundColor3 = Color3.fromRGB(40,40,40)
-title.TextColor3 = Color3.new(1,1,1)
+local logo=Instance.new("ImageLabel",frame)
+logo.Size=UDim2.new(0,50,0,50)
+logo.Position=UDim2.new(0,5,0,5)
+logo.Image="https://king.allxddev.com/lg.jpg"
+logo.BackgroundTransparency=1
 
--- close button
-local close = Instance.new("TextButton", frame)
-close.Size = UDim2.new(0,30,0,30)
-close.Position = UDim2.new(1,-30,0,0)
-close.Text = "X"
+local title=Instance.new("TextLabel",frame)
+title.Size=UDim2.new(1,-60,0,50)
+title.Position=UDim2.new(0,60,0,5)
+title.Text="AllxdDev Anime Panel"
+title.TextColor3=Color3.new(1,1,1)
+title.BackgroundTransparency=1
+title.TextScaled=true
 
--- minimize button
-local mini = Instance.new("TextButton", frame)
-mini.Size = UDim2.new(0,30,0,30)
-mini.Position = UDim2.new(1,-60,0,0)
-mini.Text = "-"
-
--- floating logo
-local logo = Instance.new("TextButton", gui)
-logo.Size = UDim2.new(0,50,0,50)
-logo.Position = UDim2.new(0.05,0,0.3,0)
-logo.Text = "AXD"
-logo.Visible = false
-logo.BackgroundColor3 = Color3.fromRGB(40,40,40)
-logo.Active = true
-logo.Draggable = true
-
-mini.MouseButton1Click:Connect(function()
-	frame.Visible = false
-	logo.Visible = true
-end)
-
-logo.MouseButton1Click:Connect(function()
-	frame.Visible = true
-	logo.Visible = false
-end)
-
-close.MouseButton1Click:Connect(function()
-	gui:Destroy()
-end)
-
--- ===== MENU BUTTON =====
-
+-- BUTTON CREATOR
 local function createToggle(text,y,callback)
-	local btn = Instance.new("TextButton", frame)
-	btn.Size = UDim2.new(1,-10,0,30)
-	btn.Position = UDim2.new(0,5,0,y)
-	btn.Text = text.." : OFF"
-	btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-	btn.TextColor3 = Color3.new(1,1,1)
 
-	local state=false
+local btn=Instance.new("TextButton",frame)
+btn.Size=UDim2.new(1,-20,0,30)
+btn.Position=UDim2.new(0,10,0,y)
+btn.Text=text.." : OFF"
+btn.BackgroundColor3=Color3.fromRGB(40,60,120)
+btn.TextColor3=Color3.new(1,1,1)
 
-	btn.MouseButton1Click:Connect(function()
-		state = not state
-		btn.Text = text.." : "..(state and "ON" or "OFF")
-		callback(state)
-	end)
+local state=false
+
+btn.MouseButton1Click:Connect(function()
+state=not state
+btn.Text=text.." : "..(state and "ON" or "OFF")
+callback(state)
+end)
+
 end
 
-createToggle("Jump 2x Higher",40,function(v)
-	jumpOn=v
+-- SPEED
+createToggle("Speed 2x",70,function(v)
+speedToggle=v
 end)
 
-createToggle("Speed 2x",75,function(v)
-	speedOn=v
+-- JUMP
+createToggle("Unlimited Jump",110,function(v)
+jumpToggle=v
 end)
 
-createToggle("Auto Jawab",110,function(v)
-	autoAnswer=v
+-- AI
+createToggle("Auto AI",150,function(v)
+aiToggle=v
 end)
 
--- delay input
-local box = Instance.new("TextBox", frame)
-box.Size = UDim2.new(1,-10,0,30)
-box.Position = UDim2.new(0,5,0,145)
-box.PlaceholderText = "Set Delay (1 = 1 detik)"
+-- DELAY BOX
+local delayBox=Instance.new("TextBox",frame)
+delayBox.Size=UDim2.new(1,-20,0,30)
+delayBox.Position=UDim2.new(0,10,0,190)
+delayBox.PlaceholderText="AI Delay (1=1detik)"
 
-box.FocusLost:Connect(function()
-	local num = tonumber(box.Text)
-	if num then
-		delayTime = num
-	end
+delayBox.FocusLost:Connect(function()
+local n=tonumber(delayBox.Text)
+if n then
+aiDelay=n
+end
 end)
 
--- ===== DOUBLE JUMP =====
+-- EXTRA WORD BOX
+local extraBox=Instance.new("TextBox",frame)
+extraBox.Size=UDim2.new(1,-20,0,30)
+extraBox.Position=UDim2.new(0,10,0,230)
+extraBox.PlaceholderText="Extra Word (manual)"
+
+extraBox.FocusLost:Connect(function()
+extraWord=extraBox.Text
+end)
+
+-- SPEED SYSTEM
+RunService.RenderStepped:Connect(function()
+
+local char=player.Character
+if char and char:FindFirstChild("Humanoid") then
+
+if speedToggle then
+char.Humanoid.WalkSpeed=32
+else
+char.Humanoid.WalkSpeed=16
+end
+
+end
+
+end)
+
+-- UNLIMITED JUMP
 UIS.JumpRequest:Connect(function()
-	if jumpOn then
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		end
-	end
+
+if jumpToggle then
+local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if hum then
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
+end
+end
+
 end)
 
--- ===== SPEED =====
-game:GetService("RunService").RenderStepped:Connect(function()
-	if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-		local hum = player.Character.Humanoid
-		if speedOn then
-			hum.WalkSpeed = 32
-		else
-			hum.WalkSpeed = 16
-		end
-	end
-end)
+-- FLOATING FPS PANEL
+local statGui=Instance.new("ScreenGui",game.CoreGui)
 
--- ===== AUTO JAWAB (contoh sederhana) =====
-local words={"apel","ikan","nasi","api","indah","hutan","naga","anggur"}
+local statFrame=Instance.new("Frame",statGui)
+statFrame.Size=UDim2.new(0,120,0,70)
+statFrame.Position=UDim2.new(0.8,0,0.05,0)
+statFrame.BackgroundColor3=Color3.fromRGB(20,20,40)
 
-task.spawn(function()
-	while true do
-		task.wait(delayTime)
-		if autoAnswer then
-			local word = words[math.random(#words)]
-			pcall(function()
-				game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(word,"All")
-			end)
-		end
-	end
+local statText=Instance.new("TextLabel",statFrame)
+statText.Size=UDim2.new(1,0,1,0)
+statText.TextColor3=Color3.new(1,1,1)
+statText.BackgroundTransparency=1
+statText.TextScaled=true
+
+local last=tick()
+local fps=0
+
+RunService.RenderStepped:Connect(function()
+
+fps=math.floor(1/(tick()-last))
+last=tick()
+
+local ping=game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString()
+
+statText.Text="FPS: "..fps.."\nPing: "..ping
+
 end)
