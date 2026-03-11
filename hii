@@ -1,81 +1,65 @@
 -- Sambung Kata Helper + Double Jump
--- by ChatGPT
 
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("ReplicatedStorage")
 
--- =================
 -- DATABASE KATA
--- =================
 local words = {
-"apel","lemari","ikan","nasi","indah","hutan","naga","api","ikan","nama","anggur","rumah",
-"hari","ikan","negara","api","ikan","nilai","induk","kuda","ayam","makan","nyata","anak",
-"kerja","api","ikan","nadi","ikan","nikah","hasil","laut","taman","nama","api","ikan",
-"nalar","rasa","api","ikan","nama","api","ikan","nikmat","tikus","sapi","ikan"
+"apel","lemari","ikan","nasi","indah","hutan","naga","api",
+"nama","anggur","rumah","hari","negara","anak","kerja",
+"taman","laut","sapi","tikus","nikmat","rasa","ayam","kuda"
 }
 
--- =================
--- SETTING
--- =================
 local autoAnswer = false
 local delaySend = 1.5
 
--- =================
--- CARI KATA
--- =================
-local function findWord(letter)
-    for _,w in pairs(words) do
-        if string.sub(w,1,1) == letter then
-            return w
-        end
-    end
+function findWord(letter)
+ for _,w in pairs(words) do
+  if string.sub(w,1,1) == letter then
+   return w
+  end
+ end
 end
 
--- =================
 -- AUTO JAWAB
--- =================
 spawn(function()
-    while true do
-        task.wait(delaySend)
+ while true do
+  task.wait(delaySend)
 
-        if autoAnswer then
-            local lastLetter = "a" -- biasanya diambil dari chat game
-            local word = findWord(lastLetter)
+  if autoAnswer then
+   local lastLetter = "a"
+   local word = findWord(lastLetter)
 
-            if word then
-                pcall(function()
-                    RS.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(word,"All")
-                end)
-            end
-        end
-    end
+   if word then
+    pcall(function()
+     RS.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(word,"All")
+    end)
+   end
+  end
+ end
 end)
 
--- =================
 -- DOUBLE JUMP
--- =================
 local jumps = 0
 local maxJumps = 2
 
 UIS.JumpRequest:Connect(function()
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+ local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
-    if humanoid then
-        if jumps < maxJumps then
-            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            jumps = jumps + 1
-        end
-    end
+ if humanoid then
+  if jumps < maxJumps then
+   humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+   jumps = jumps + 1
+  end
+ end
 end)
 
 player.CharacterAdded:Connect(function()
-    jumps = 0
+ jumps = 0
 end)
 
--- =================
--- UI
--- =================
+-- UI MENU
 local ScreenGui = Instance.new("ScreenGui",game.CoreGui)
 local Frame = Instance.new("Frame",ScreenGui)
 
@@ -90,13 +74,13 @@ Button.BackgroundColor3 = Color3.fromRGB(40,40,40)
 Button.TextColor3 = Color3.new(1,1,1)
 
 Button.MouseButton1Click:Connect(function()
-    autoAnswer = not autoAnswer
+ autoAnswer = not autoAnswer
 
-    if autoAnswer then
-        Button.Text = "AUTO ANSWER : ON"
-    else
-        Button.Text = "AUTO ANSWER : OFF"
-    end
+ if autoAnswer then
+  Button.Text = "AUTO ANSWER : ON"
+ else
+  Button.Text = "AUTO ANSWER : OFF"
+ end
 end)
 
 local DelayBtn = Instance.new("TextButton",Frame)
@@ -105,9 +89,9 @@ DelayBtn.Size = UDim2.new(1,0,0,40)
 DelayBtn.Text = "Delay : "..delaySend
 
 DelayBtn.MouseButton1Click:Connect(function()
-    delaySend = delaySend + 0.5
-    if delaySend > 3 then
-        delaySend = 1
-    end
-    DelayBtn.Text = "Delay : "..delaySend
+ delaySend = delaySend + 0.5
+ if delaySend > 3 then
+  delaySend = 1
+ end
+ DelayBtn.Text = "Delay : "..delaySend
 end)
